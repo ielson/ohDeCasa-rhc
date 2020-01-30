@@ -1,9 +1,12 @@
 from flask import Flask, request
+import json
 from datetime import datetime
 
 app = Flask(__name__)
 
-open = False
+raulOpen = False
+usersFile = "activeUsers.txt"
+checkedUsers = {}
 
 @app.route("/")
 def index():
@@ -15,16 +18,19 @@ def status():
 
 @app.route("/checkin", methods=['POST'])
 #TODO deal with timezones
+#TODO save in file
 def checkin():
-    open = True
+    raulOpen = True
     try:
         reqData = request.get_json()
-        print(reqData)
-        print('depois')
         user = reqData['user']
     except KeyError:
         user = "Raul Seixas"
-    checkedUser = {'user': user, 'datetime':datetime.now(), 'open': open}
+    currentTime = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+    checkedUser = {'user': user, 'datetime': currentTime, 'open': raulOpen}
+    checkedUsers[user] = checkedUser
+    with open(usersFile, 'w') as file:
+        json.dump(checkedUsers, file)
     return checkedUser
 
 
